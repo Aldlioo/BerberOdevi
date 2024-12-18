@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Berber.Models
+namespace kaufor.Models
 {
     public class Service
     {
@@ -12,6 +13,7 @@ namespace Berber.Models
 
         [Required(ErrorMessage = "Price is required.")]
         [Range(0.01, 1000.00, ErrorMessage = "Price must be between $0.01 and $1000.")]
+        [Column(TypeName = "decimal(18, 2)")] // Specify precision and scale
         public decimal Price { get; set; }
 
         [Required(ErrorMessage = "Duration in minutes is required.")]

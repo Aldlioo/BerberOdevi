@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Berber.Models
+namespace kaufor.Models
 {
     public class Appointment
     {

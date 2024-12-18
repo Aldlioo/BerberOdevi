@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Berber.Models
+namespace kaufor.Models
 {
     public class Salon
     {
@@ -15,9 +15,9 @@ namespace Berber.Models
 
         [Required(ErrorMessage = "Working Hours are required.")]
         public string WorkingHours { get; set; }
-        
+
     }
 }
 
 
-    
+

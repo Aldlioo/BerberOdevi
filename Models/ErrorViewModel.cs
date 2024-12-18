@@ -1,4 +1,4 @@
-namespace Berber.Models
+namespace kaufor.Models
 {
     public class ErrorViewModel
     {

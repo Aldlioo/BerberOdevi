@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using Berber.Models;
+using kaufor.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Berber.Controllers
+namespace kaufor.Controllers
 {
     public class HomeController : Controller
     {
