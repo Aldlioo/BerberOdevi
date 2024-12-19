@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using kaufor.Data;
 using kaufor.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace kaufor.Controllers
 {
+    [Authorize]
     public class ServicesController : Controller
     {
         private readonly ApplicationDbContext _context;
