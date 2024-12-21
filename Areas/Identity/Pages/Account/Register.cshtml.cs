@@ -74,6 +74,14 @@ namespace Berber.Areas.Identity.Pages.Account
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
+            [Required(ErrorMessage = "Ad Gerekli.")]
+            [StringLength(50, ErrorMessage = "Ad 50 Kareteden uzun Olmaz")]
+            public string Name { get; set; }
+
+            [Required(ErrorMessage = "Soyad Gerekli.")]
+            [StringLength(50, ErrorMessage = "Soyad 50 Kareteden uzun Olmaz")]
+            public string Surname { get; set; }
+
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
@@ -84,7 +92,7 @@ namespace Berber.Areas.Identity.Pages.Account
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 2)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; }

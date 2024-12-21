@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace kaufor.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class SalonsController : Controller
     {
         private readonly ApplicationDbContext _context;

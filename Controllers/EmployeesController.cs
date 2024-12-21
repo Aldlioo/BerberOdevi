@@ -11,10 +11,11 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace kaufor.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Calisan")]
     public class EmployeesController : Controller
     {
         private readonly ApplicationDbContext _context;
+
 
         public EmployeesController(ApplicationDbContext context)
         {
@@ -22,6 +23,7 @@ namespace kaufor.Controllers
         }
 
         // GET: Employees
+
         public async Task<IActionResult> Index()
         {
             return View(await _context.Employees.ToListAsync());
@@ -30,13 +32,16 @@ namespace kaufor.Controllers
         // GET: Employees/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            if (id == null || _context.Employees == null)
             {
                 return NotFound();
             }
 
             var employee = await _context.Employees
+                .Include(e => e.Appointments)
+                .ThenInclude(a => a.Service) // Include Service to calculate earnings
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (employee == null)
             {
                 return NotFound();
@@ -44,6 +49,7 @@ namespace kaufor.Controllers
 
             return View(employee);
         }
+
 
         // GET: Employees/Create
         public IActionResult Create()
