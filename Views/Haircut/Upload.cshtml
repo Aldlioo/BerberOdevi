@@ -1,0 +1,12 @@
+﻿@model kaufor.Models.ImageUploadViewModel
+
+<h2>Upload Your Image</h2>
+
+<form asp-action="AnalyzeImage" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="Image" class="control-label"></label>
+        <input asp-for="Image" type="file" class="form-control" />
+        <span asp-validation-for="Image" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Analyze</button>
+</form>

@@ -22,7 +22,7 @@ namespace kaufor.Models
         public List<Appointment> Appointments { get; set; }
 
         // Calculated property for total earnings
-        [NotMapped] // Ensures this property is not stored in the database
+        //[NotMapped] // Ensures this property is not stored in the database
         public decimal TotalEarnings => Appointments?.Sum(a => a.Service.Price) ?? 0;
     }
 }
