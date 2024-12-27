@@ -27,8 +27,9 @@
                         <!-- Admin-Only Menu Items -->
                         @if (User.IsInRole("Admin"))
                         {
+                            
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Appointments" asp-action="Index">Appointment</a>
+                                <a class="nav-link text-dark" asp-area=""  asp-action="PendingApprovals" asp-controller="Appointments">Pending Approvals</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Salons" asp-action="Index">Salon</a>
@@ -47,9 +48,7 @@
                         <!-- Calisan-Only Menu Items -->
                         @if (User.IsInRole("Calisan"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Appointments" asp-action="Index">Appointment</a>
-                            </li>
+                            
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Services" asp-action="Index">Service</a>
                             </li>
@@ -59,15 +58,15 @@
                         }
 
                         <!-- Musteri-Only Menu Items -->
-                        @if (User.IsInRole("Musteri"))
-                        {
+                        
+                        
                              <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Appointments" asp-action="Index">Appointment</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Haircut" asp-action="Upload">AI Haircut</a>
                             </li>
-                        }
+                        
                         
                     </ul>
                     <partial name="_LoginPartial" />

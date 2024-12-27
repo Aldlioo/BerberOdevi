@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -24,8 +23,11 @@ namespace kaufor.Controllers
         // GET: Appointments
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Appointments.Include(a => a.Employee).Include(a => a.Salon).Include(a => a.Service);
-            return View(await applicationDbContext.ToListAsync());
+            var appointments = _context.Appointments
+                .Include(a => a.Employee)
+                .Include(a => a.Salon)
+                .Include(a => a.Service);
+            return View(await appointments.ToListAsync());
         }
 
         // GET: Appointments/Details/5
@@ -41,6 +43,7 @@ namespace kaufor.Controllers
                 .Include(a => a.Salon)
                 .Include(a => a.Service)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (appointment == null)
             {
                 return NotFound();
@@ -52,41 +55,52 @@ namespace kaufor.Controllers
         // GET: Appointments/Create
         public IActionResult Create()
         {
-            PopulateDropdowns(); // Populates dropdown lists
+            PopulateDropdowns();
             return View();
         }
 
-
         // POST: Appointments/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,DateTime,SalonId,EmployeeId,ServiceId,CustomerName")] Appointment appointment)
         {
-            // Check for overlapping appointments
+            // Fetch the service to get the duration
+            var service = await _context.Services.FindAsync(appointment.ServiceId);
+            if (service == null)
+            {
+                ModelState.AddModelError("", "Invalid service selected.");
+                PopulateDropdowns();
+                return View(appointment);
+            }
+
+            // Calculate the end time of the new appointment
+            var newAppointmentStartTime = appointment.DateTime;
+            var newAppointmentEndTime = newAppointmentStartTime.AddMinutes(service.DurationInMinutes);
+
+            // Check for conflicting appointments
             var conflictingAppointment = await _context.Appointments
-                .Where(a => a.EmployeeId == appointment.EmployeeId &&
-                            a.DateTime == appointment.DateTime)
+                .Where(a => a.EmployeeId == appointment.EmployeeId)
+                .Where(a =>
+                    (a.DateTime < newAppointmentEndTime &&
+                     a.DateTime.AddMinutes(a.Service.DurationInMinutes + 5) > newAppointmentStartTime))
                 .FirstOrDefaultAsync();
 
             if (conflictingAppointment != null)
             {
-                ModelState.AddModelError("", "The selected employee is already booked at this time.");
+                ModelState.AddModelError("", "This employee is already booked at the selected time or there is not enough gap between appointments.");
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(appointment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                PopulateDropdowns();
+                return View(appointment);
             }
 
-            // Repopulate dropdowns if validation fails
-            PopulateDropdowns();
-            return View(appointment);
+            appointment.IsApproved = false; // Mark as pending approval
+            _context.Add(appointment);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
-
 
         // GET: Appointments/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -101,22 +115,45 @@ namespace kaufor.Controllers
             {
                 return NotFound();
             }
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "Id", "Name", appointment.EmployeeId);
-            ViewData["SalonId"] = new SelectList(_context.Salons, "Id", "Name", appointment.SalonId);
-            ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Name", appointment.ServiceId);
+
+            PopulateDropdowns(appointment);
             return View(appointment);
         }
 
         // POST: Appointments/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,DateTime,SalonId,EmployeeId,ServiceId,CustomerName")] Appointment appointment)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,DateTime,SalonId,EmployeeId,ServiceId,CustomerName,IsApproved")] Appointment appointment)
         {
             if (id != appointment.Id)
             {
                 return NotFound();
+            }
+
+            // Fetch the service to get the duration
+            var service = await _context.Services.FindAsync(appointment.ServiceId);
+            if (service == null)
+            {
+                ModelState.AddModelError("", "Invalid service selected.");
+                PopulateDropdowns(appointment);
+                return View(appointment);
+            }
+
+            // Calculate the end time of the new appointment
+            var newAppointmentStartTime = appointment.DateTime;
+            var newAppointmentEndTime = newAppointmentStartTime.AddMinutes(service.DurationInMinutes);
+
+            // Check for conflicting appointments
+            var conflictingAppointment = await _context.Appointments
+                .Where(a => a.EmployeeId == appointment.EmployeeId && a.Id != appointment.Id)
+                .Where(a =>
+                    (a.DateTime < newAppointmentEndTime &&
+                     a.DateTime.AddMinutes(a.Service.DurationInMinutes + 5) > newAppointmentStartTime))
+                .FirstOrDefaultAsync();
+
+            if (conflictingAppointment != null)
+            {
+                ModelState.AddModelError("", "This employee is already booked at the selected time or there is not enough gap between appointments.");
             }
 
             if (ModelState.IsValid)
@@ -139,55 +176,66 @@ namespace kaufor.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "Id", "Name", appointment.EmployeeId);
-            ViewData["SalonId"] = new SelectList(_context.Salons, "Id", "Name", appointment.SalonId);
-            ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Name", appointment.ServiceId);
+
+            PopulateDropdowns(appointment);
             return View(appointment);
         }
 
-        private void PopulateDropdowns()
+        // GET: Appointments/PendingApprovals
+        public async Task<IActionResult> PendingApprovals()
         {
-            ViewBag.Employees = new SelectList(_context.Employees, "Id", "Name");
-            ViewBag.Services = new SelectList(_context.Services, "Id", "Name");
-            ViewBag.Salons = new SelectList(_context.Salons, "Id", "Name");
-        }
-
-        // GET: Appointments/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var appointment = await _context.Appointments
+            var pendingAppointments = await _context.Appointments
+                .Where(a => !a.IsApproved)
                 .Include(a => a.Employee)
                 .Include(a => a.Salon)
                 .Include(a => a.Service)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .ToListAsync();
+
+            return View(pendingAppointments);
+        }
+
+        // POST: Appointments/Approve
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveAppointment(int id)
+        {
+            var appointment = await _context.Appointments.FindAsync(id);
             if (appointment == null)
             {
                 return NotFound();
             }
 
-            return View(appointment);
+            appointment.IsApproved = true; // Approve the appointment
+            _context.Update(appointment);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(PendingApprovals));
         }
 
-        // POST: Appointments/Delete/5
-        [HttpPost, ActionName("Delete")]
+        // POST: Appointments/Reject
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> RejectAppointment(int id)
         {
             var appointment = await _context.Appointments.FindAsync(id);
-            if (appointment != null)
+            if (appointment == null)
             {
-                _context.Appointments.Remove(appointment);
+                return NotFound();
             }
 
+            _context.Appointments.Remove(appointment); // Reject by deleting
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(PendingApprovals));
         }
 
+        // Helper method to populate dropdowns
+        private void PopulateDropdowns(Appointment appointment = null)
+        {
+            ViewBag.Employees = new SelectList(_context.Employees, "Id", "Name", appointment?.EmployeeId);
+            ViewBag.Services = new SelectList(_context.Services, "Id", "Name", appointment?.ServiceId);
+            ViewBag.Salons = new SelectList(_context.Salons, "Id", "Name", appointment?.SalonId);
+        }
+
+        // Helper method to check if an appointment exists
         private bool AppointmentExists(int id)
         {
             return _context.Appointments.Any(e => e.Id == id);

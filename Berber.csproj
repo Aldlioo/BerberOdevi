@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\generated-images\" />
+    <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
 </Project>

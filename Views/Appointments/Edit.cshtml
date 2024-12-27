@@ -1,54 +1,71 @@
-﻿@model kaufor.Models.Appointment
+﻿
+
+
+
+
+ @model kaufor.Models.Appointment
 
 @{
     ViewData["Title"] = "Edit";
 }
+<h1>Create Appointment</h1>
 
-<h1>Edit</h1>
-
-<h4>Appointment</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="All" class="text-danger"></div>
+
             <div class="form-group">
                 <label asp-for="DateTime" class="control-label"></label>
                 <input asp-for="DateTime" class="form-control" />
                 <span asp-validation-for="DateTime" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="SalonId" class="control-label"></label>
-                <select asp-for="SalonId" class="form-control" asp-items="ViewBag.SalonId"></select>
+                <select asp-for="SalonId" class="form-control" asp-items="ViewBag.Salons">
+                    <option value="">-- Select Salon --</option>
+                </select>
                 <span asp-validation-for="SalonId" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="EmployeeId" class="control-label"></label>
-                <select asp-for="EmployeeId" class="form-control" asp-items="ViewBag.EmployeeId"></select>
+                <select asp-for="EmployeeId" class="form-control" asp-items="ViewBag.Employees">
+                    <option value="">-- Select Employee --</option>
+                </select>
                 <span asp-validation-for="EmployeeId" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="ServiceId" class="control-label"></label>
-                <select asp-for="ServiceId" class="form-control" asp-items="ViewBag.ServiceId"></select>
+                <select asp-for="ServiceId" class="form-control" asp-items="ViewBag.Services">
+                    <option value="">-- Select Service --</option>
+                </select>
                 <span asp-validation-for="ServiceId" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="CustomerName" class="control-label"></label>
                 <input asp-for="CustomerName" class="form-control" />
                 <span asp-validation-for="CustomerName" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Edit" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>
 
+
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

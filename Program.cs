@@ -20,8 +20,10 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 }).AddRoles<IdentityRole>()                           // Add roles to the Identity system
   .AddEntityFrameworkStores<ApplicationDbContext>();
 
-builder.Services.AddControllersWithViews();
-
+builder.Services.AddControllersWithViews(options =>
+{
+    options.ModelValidatorProviders.Clear(); // Disable default DataAnnotations validation globally
+});
 
 
 // Configure the Login Path for unauthenticated users

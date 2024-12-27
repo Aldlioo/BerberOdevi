@@ -1,0 +1,47 @@
+﻿@model IEnumerable<kaufor.Models.Appointment>
+
+@{
+    ViewData["Title"] = "Pending Approvals";
+}
+
+<h1>Pending Approvals</h1>
+
+<hr />
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Appointment Date</th>
+            <th>Salon</th>
+            <th>Employee</th>
+            <th>Service</th>
+            <th>Customer Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var appointment in Model)
+        {
+            <tr>
+                <td>@appointment.DateTime</td>
+                <td>@appointment.Salon?.Name</td>
+                <td>@appointment.Employee?.Name</td>
+                <td>@appointment.Service?.Name</td>
+                <td>@appointment.CustomerName</td>
+                <td>
+                    <form asp-action="ApproveAppointment" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@appointment.Id" />
+                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                    </form>
+                    <form asp-action="RejectAppointment" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@appointment.Id" />
+                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>
