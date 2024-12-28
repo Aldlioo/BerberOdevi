@@ -180,7 +180,7 @@ namespace kaufor.Controllers
             PopulateDropdowns(appointment);
             return View(appointment);
         }
-
+        [Authorize(Roles = "Admin")]
         // GET: Appointments/PendingApprovals
         public async Task<IActionResult> PendingApprovals()
         {
